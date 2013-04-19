@@ -6,8 +6,8 @@ while (my $f = shift) {
     my $bak = $f.".escbak";
     my $work = $f.".escwrk";
     my $infile = (-f $bak) ? $bak : $f;
-    open my $in, "<", $infileor die;
-    open my $out, ">", $workor die;
+    open my $in, "<", $infile	or die;
+    open my $out, ">", $work	or die;
     my $changed = 0;
     while (<$in>) {
 	if (s/[\x80-\xff]/sprintf('\x%02x',ord($&))/eg) {
@@ -18,13 +18,13 @@ while (my $f = shift) {
     close $out;
     close $in;
 
-    {
+    if (! $changed) {
+	unlink($work);
 	local $| = 1;
-	if (! $changed) {
-	    unlink($work);
-	    print STDERR "-";
-	    next;
-	}
+	print STDERR "-";
+	next;
+    }else {
+	local $| = 1;
 	print STDERR ".";
     }
 
